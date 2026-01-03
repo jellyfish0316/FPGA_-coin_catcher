@@ -1,0 +1,44 @@
+module score_keeper(clk, reset, time_up, player_x, coin_x, coin_y, coin_type, score, coin_caught);
+
+
+input clk;           
+input reset;         
+input time_up;       // Gameover Signal
+input [2:0] player_x;// Player paddle position (0~7)
+input [2:0] coin_x;  // Coin X position (0~7)
+input [3:0] coin_y;  // Coin Y position (0~15)
+input coin_type;     // Coin size: 0 = 1x1, 1 = 2x1 (type_out in coin_generater)
+output reg [7:0] score;
+output reg coin_caught;    //Reset signal for coin_generater
+
+
+// Check if coin has reached the bottom row
+wire coin_at_bottom = (coin_y == 4'd15);
+
+// Collision for 1x1 coin
+wire collision_1x1 = (coin_x == player_x);
+
+// Collision for 2x1 coin
+wire collision_2x1 = (coin_x == player_x) || (coin_x + 1 == player_x);
+
+// bottom check with collision check
+wire collision = coin_at_bottom && (coin_type ? collision_2x1 : collision_1x1);
+
+
+always @(posedge clk or negedge reset) begin
+    if (!reset) begin
+        score <= 0;
+        coin_caught <= 0;
+    end
+    else if (!time_up) begin
+        coin_caught <= collision;  // Tell coin_generator to spawn new coin
+        if (collision)
+            score <= score + 1;    // successful catch
+    end
+    else begin
+        // Gameover
+        coin_caught <= 0;
+    end
+end
+
+endmodule

@@ -1,0 +1,57 @@
+module matrix_driver(
+ clk, //(10k hz)
+ reset, 
+ player_x, //x pos 0~7
+ coin_x, coin_y,// x pos 0~7, y pos 0 ~ 15
+ coin_type, //0 = size 1x1, 1 = size 2x1
+ row_out, col_out
+);
+
+input clk, reset, coin_type;
+input [2:0] player_x, coin_x;
+input [3:0] coin_y;
+
+output reg [7:0] row_out;
+output reg [15:0] col_out;
+
+reg [2:0] scan_x;// Counter for scanning rows (0~7)
+
+always@(posedge clk or negedge reset)
+begin
+ if(!reset)
+ begin
+  scan_x <= 3'd0;
+  row_out <= 8'b0;
+  col_out <= 16'hFFFF;
+ end
+ else
+ begin
+  if(scan_x==3'd7)begin
+   scan_x <= 3'd0;
+  end
+  else begin
+   scan_x <= scan_x+3'd1;
+  end
+  
+  row_out <= (8'b00000001<< scan_x);
+  
+  col_out <= 16'hFFFF;
+  
+  if(scan_x == player_x)begin
+   col_out[15] <= 1'b0;
+  end
+  if (coin_type == 1'b0)begin
+   if (scan_x == coin_x)begin
+    col_out[coin_y] <= 1'b0;
+   end
+  end
+  else begin
+   if (scan_x == coin_x ||(coin_x != 3'd7 && scan_x == coin_x + 3'd1))begin
+    col_out[coin_y] <= 1'b0;
+   end
+  end
+  
+ end
+end
+
+endmodule

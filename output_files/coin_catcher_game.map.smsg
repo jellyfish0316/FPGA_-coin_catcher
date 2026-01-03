@@ -1,0 +1,1 @@
+Info (10281): Verilog HDL Declaration information at game_core.v(17): object "score" differs only in case from object "Score" in the same scope File: D:/Verilog_Project/coin_catcher_game/game_core.v Line: 17
